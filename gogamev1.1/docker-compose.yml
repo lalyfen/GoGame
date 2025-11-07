@@ -1,0 +1,148 @@
+services:
+  # Nginx - 前端静态文件服务 + API反向代理
+  nginx:
+    build:
+      context: ./frontend前端
+      dockerfile: Dockerfile
+    container_name: gogame_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend前端/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/usr/share/nginx/html/static:ro
+      - media_volume:/usr/share/nginx/html/media:ro
+    networks:
+      - gogame_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # 前端构建服务（仅用于构建，不常驻）
+  frontend:
+    build:
+      context: ./frontend前端
+      dockerfile: Dockerfile
+      target: build-stage
+    container_name: gogame_frontend_build
+    volumes:
+      - frontend_build:/app/dist
+    networks:
+      - gogame_network
+    profiles:
+      - build-only  # 使用 docker-compose --profile build-only up 来构建
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: gogame_postgres
+    environment:
+      POSTGRES_DB: gogame_db
+      POSTGRES_USER: gogame_user
+      POSTGRES_PASSWORD: gogame_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gogame_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gogame_user -d gogame_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: gogame_redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - gogame_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Django 后端服务
+  backend:
+    build:
+      context: ./backend后端
+      dockerfile: Dockerfile
+    container_name: gogame_backend
+    environment:
+      # 数据库配置
+      - DATABASE_HOST=postgres
+      - DATABASE_NAME=gogame_db
+      - DATABASE_USER=gogame_user
+      - DATABASE_PASSWORD=gogame_password
+      - DATABASE_PORT=5432
+
+      # Redis配置
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=
+
+      # Django配置
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-production-key-change-this}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+
+      # 生产环境配置
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-admin}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-admin@example.com}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD:-admin123}
+
+      # Gunicorn配置
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-1}
+      - GUNICORN_THREADS=${GUNICORN_THREADS:-4}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+
+      # CORS配置（通过nginx代理，配置同源）
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://127.0.0.1}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,backend}
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    networks:
+      - gogame_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+  frontend_build:
+    driver: local
+
+networks:
+  gogame_network:
+    driver: bridge

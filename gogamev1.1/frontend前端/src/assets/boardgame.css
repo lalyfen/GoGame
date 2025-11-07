@@ -1,0 +1,246 @@
+/**
+ * 全局样式 - 只包含真正全局的样式
+ * 组件特定样式已移至各组件的 scoped CSS
+ */
+
+/* 全局重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+}
+
+/* 消息面板切换按钮 - 全局悬浮按钮 */
+.message-panel-toggle {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.message-panel-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.message-panel-toggle::before {
+    content: '💬';
+    font-size: 24px;
+}
+
+.message-panel-toggle.panel-hidden::before {
+    content: '📋';
+}
+
+/* 顶部操作按钮列表（紧凑图标样式） */
+.message-panel-actions {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1001;
+}
+
+.message-panel-actions a { display: block; text-decoration: none; }
+
+.message-panel-actions button {
+    all: unset;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+    transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    font-size: 0; /* 隐藏文字，仅显示图标 */
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, #30343f 0%, #1f2430 100%);
+}
+
+.message-panel-actions button::before {
+    content: '💬';
+    font-size: 20px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+}
+
+.message-panel-actions button::after {
+    content: '';
+    position: absolute;
+    top: -120%;
+    left: -120%;
+    width: 240%;
+    height: 240%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), transparent 60%);
+    transform: rotate(0deg);
+    transition: transform .45s ease;
+}
+
+.message-panel-actions button:hover { transform: translateY(-1px) scale(1.05); box-shadow: 0 10px 26px rgba(0,0,0,0.35); }
+.message-panel-actions button:hover::after { transform: rotate(25deg); }
+.message-panel-actions button:active { transform: translateY(0) scale(1.0); }
+.message-panel-actions button:focus-visible { outline: 2px solid rgba(255,255,255,0.55); outline-offset: 2px; }
+
+/* 主题与图标按 title 匹配 */
+.message-panel-actions button[title*="登出"] { background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%); }
+.message-panel-actions button[title*="登出"]::before { content: '⎋'; }
+.message-panel-actions button[title*="历史"] { background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%); }
+.message-panel-actions button[title*="历史"]::before { content: '🕘'; }
+.message-panel-actions button[title*="邀请"],
+.message-panel-actions button[title*="链接"] { background: linear-gradient(135deg, #22d3ee 0%, #22c55e 100%); }
+.message-panel-actions button[title*="邀请"]::before,
+.message-panel-actions button[title*="链接"]::before { content: '🔗'; }
+.message-panel-actions button[title*="消息"] { background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%); }
+.message-panel-actions button[title*="消息"]::before { content: '💬'; }
+
+/* hover 光环根据主题颜色微调 */
+.message-panel-actions button[title*="登出"]:hover { box-shadow: 0 0 0 2px rgba(239,68,68,0.35), 0 12px 28px rgba(0,0,0,0.35); }
+.message-panel-actions button[title*="历史"]:hover { box-shadow: 0 0 0 2px rgba(99,102,241,0.35), 0 12px 28px rgba(0,0,0,0.35); }
+.message-panel-actions button[title*="邀请"]:hover,
+.message-panel-actions button[title*="链接"]:hover { box-shadow: 0 0 0 2px rgba(34,197,94,0.35), 0 12px 28px rgba(0,0,0,0.35); }
+.message-panel-actions button[title*="消息"]:hover { box-shadow: 0 0 0 2px rgba(245,158,11,0.35), 0 12px 28px rgba(0,0,0,0.35); }
+
+@media (max-width: 768px) {
+    .message-panel-actions { right: 12px; top: 12px; gap: 8px; }
+    .message-panel-actions button { width: 40px; height: 40px; }
+}
+
+/* App root - 顶层容器 */
+.app-root {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 游戏容器 - Board + InfoPanel 的父容器 */
+.game-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px;
+    background: white;
+    /* 减小右侧内边距，缩短 InfoPanel 到容器右边的距离 */
+    padding: 25px 0px 25px 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    height: 100%;
+    min-width: 0; /* 由容器约束，不再强制最小宽度以避免产生内部滚动 */
+    overflow: hidden; /* 不让 game-container 自身出现滚动条 */
+}
+
+/* 棋盘容器 */
+.board-container {
+    position: relative;
+    width: 100%;            /* 占满其栅格列宽度 */
+    height: auto;           /* 让高随宽而定 */
+    max-height: 100%;       /* 不超过 game-container 的可用高度 */
+    aspect-ratio: 1 / 1;    /* 保持正方形 */
+    background: #DEB068;
+    --board-pad: 5%;
+    padding: var(--board-pad);
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+    justify-self: center;   /* 在列内水平居中 */
+    box-sizing: border-box;
+}
+
+/* 全局消息提示（如果使用全局 Toast） */
+.message-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.message {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 16px;
+    min-width: 300px;
+    text-align: center;
+    pointer-events: auto;
+    animation: slideDown 0.3s ease;
+}
+
+.message.info {
+    border-left: 5px solid #2196F3;
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.message.warning {
+    border-left: 5px solid #FF9800;
+    background: #FFF3E0;
+    color: #F57C00;
+}
+
+.message.error {
+    border-left: 5px solid #F44336;
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+.message.success {
+    border-left: 5px solid #4CAF50;
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+.message.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}

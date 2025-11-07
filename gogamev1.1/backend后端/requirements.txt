@@ -1,0 +1,26 @@
+# Django Core Framework
+Django==5.2.5
+
+# Django REST Framework
+djangorestframework==3.15.2
+
+# JWT Authentication
+djangorestframework-simplejwt==5.4.0
+
+# CORS Support
+django-cors-headers==4.6.0
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# PostgreSQL Database Support
+psycopg2-binary==2.9.10  # PostgreSQL adapter
+dj-database-url==2.2.0   # Database URL configuration
+
+# Redis Support
+redis==6.4.0
+django-redis==6.0.0
+
+# Production Server
+gunicorn==23.0.0        # Production WSGI server
+uvicorn==0.34.0         # Production ASGI server

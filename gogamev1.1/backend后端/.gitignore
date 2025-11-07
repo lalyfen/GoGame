@@ -1,0 +1,89 @@
+# 环境变量文件
+.env
+.env.local
+.env.production
+*.env
+
+# Django相关
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# 静态文件和媒体文件
+/media/
+/static/
+/staticfiles/
+/collected_static/
+
+# 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+.cache/
+*.cache
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 日志文件
+logs/
+*.log
+access.log
+error.log
+django.log
+datab.log
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 测试
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 其他
+*.pid
+*.seed
+*.pid.lock
+
+# 保留重要文件
+!requirements.txt
+!Dockerfile
+!docker-entrypoint.sh
+!gunicorn.conf.py
+!manage.py
+!**/migrations/
+!**/api/
+!**/core/
+!**/datab/
+!**/invitation/
